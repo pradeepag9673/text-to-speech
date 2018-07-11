@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+<title>Text-To-Speech</title>
+<style>
+.btn,btn-primary{
+background-color: #1166bb;
+border-color: #1166bb;
+}
+</style>
+<script>
+var us_voice = [{"id":"Salli, Female","name":"Salli"}, {"id":"Matthew, Male","name":"Matthew"}, {"id":"Kimberly, Female","name":"Kimberly"}, {"id":"Kendra, Female","name":"Kendra"}, {"id":"Justin, Male","name":"Justin"}, {"id":"Joey, Male","name":"Joey"}, {"id":"Joanna, Female","name":"Joanna"}, {"id":"Ivy, Female","name":"Ivy"}];
+var ind_voice = [{"id":"Raveena, Female","name":"Raveena"}, {"id":"Aditi, Female","name":"Aditi"}];
+var uk_voice = [{"id":"Emma, Female","name":"Emma"}, {"id":"Brian, Male","name":"Brian"}, {"id":"Amy, Female","name":"Amy"}];
+var aus_voice = [{"id":"Russell, Male","name":"Russell"}, {"id":"Nicole, Female","name":"Nicole"}];
+
+$(document).ready(function() {
+    var text_max = 3000;
+    var default_text = "Hi! My name is Joanna. I will read any text you type here.";
+    var char_remaining = " characters remaining (3000 maximum)";
+    $('#textarea').val(default_text);
+    var text_length = $('#textarea').val().length;
+    var text_remaining = text_max - text_length;
+    $('#textarea_feedback').html(text_remaining + char_remaining);
+    
+    $('#textarea').keyup(function() {
+        var text_length = $('#textarea').val().length;
+        var text_remaining = text_max - text_length;
+        $('#textarea_feedback').html(text_remaining + char_remaining);
+    });
+    
+    $('#defaulttextbtn').click(function() {
+         $('#textarea').val(default_text);
+         var text_length = $('#textarea').val().length;
+         var text_remaining = text_max - text_length;
+         $('#textarea_feedback').html(text_remaining + char_remaining);
+     });
+    
+    $('#cleartextbtn').click(function() {
+        $('#textarea').val('');
+        var text_length = $('#textarea').val().length;
+        var text_remaining = text_max - text_length;
+        $('#textarea_feedback').html(text_remaining + char_remaining);
+     });
+    
+    $("#converttxttospeech").click(function(){
+         var obj = {"plaintext": $("#textarea").val(), "voice": $("input[name='group100']:checked").val()};
+         console.log(obj);         
+    });
+    
+});
+
+function selectVoice(e){    
+    var html = '';
+    if(e == 1){
+        $('#dropdownbtn').html("US English");
+        for(var i = 0;i < us_voice.length;i++){
+    	html += '<div class="form-check">';
+    	html += '<input type="radio" class="form-check-input" id="radio'+i+'" name="group100" value="'+us_voice[i].name+'">';
+    	html += '<label class="form-check-label" for="radio'+i+'">'+us_voice[i].id+'</label>';
+    	html += '</label>';
+    	html += '</div>';
+        }
+    }else if(e == 2){
+        $('#dropdownbtn').html("Indian English");
+        for(var i = 0;i < ind_voice.length;i++){
+        	html += '<div class="form-check">';
+            html += '<input type="radio" class="form-check-input" id="radio'+i+'" name="group100" value="'+ind_voice[i].name+'">';
+            html += '<label class="form-check-label" for="radio'+i+'">'+ind_voice[i].id+'</label>';
+            html += '</label>';
+            html += '</div>';
+        }   
+    }else if(e == 3){
+        $('#dropdownbtn').html("British English");
+        for(var i = 0;i < uk_voice.length;i++){
+        	html += '<div class="form-check">';
+            html += '<input type="radio" class="form-check-input" id="radio'+i+'" name="group100" value="'+uk_voice[i].name+'">';
+            html += '<label class="form-check-label" for="radio'+i+'">'+uk_voice[i].id+'</label>';
+            html += '</label>';
+            html += '</div>';
+        }
+    }else{
+        $('#dropdownbtn').html("Australian English");
+        for(var i = 0;i < aus_voice.length;i++){
+        	html += '<div class="form-check">';
+            html += '<input type="radio" class="form-check-input" id="radio'+i+'" name="group100" value="'+aus_voice[i].name+'">';
+            html += '<label class="form-check-label" for="radio'+i+'">'+aus_voice[i].id+'</label>';
+            html += '</label>';
+            html += '</div>';
+        }
+    }
+    $("#checkbox").html(html);
+}
+</script>
+</head>
+<body>
+<div class="container">
+  <h2 style="border-bottom: 2px solid #1d2124;">Text-To-Speech</h2>
+  <br>
+  <h4 style="margin-top: -14px">Listen, customize, and download speech. Integrate when you're ready.</h4><br/>
+  <p>Type or paste your text in the window, choose your language and region, choose a voice, choose Listen to speech, and then integrate it into your applications and services.</p>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#plaintxt">Plain Text</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#audio">Audio</a>
+    </li>    
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div id="plaintxt" class="container tab-pane active"><br>
+      <div class="form-group">
+      <textarea class="form-control" rows="5" maxlength="3000" id="textarea" name="textarea">Hi! My name is Joanna. I will read any text you type here.</textarea>
+      <span id="textarea_feedback"></span>
+      <span style="margin-left: 640px;">
+      <button id="defaulttextbtn" class="btn btn-primary">Show default text</button>
+      <button id="cleartextbtn" class="btn btn-primary">Clear text</button>
+      <button id="converttxttospeech" class="btn btn-primary">Convert Text To Speech</button> 
+      </span>
+      </div>
+      <h4 style="font-family: Helvetica Neue, Roboto, Arial, sans-serif;">Language and Region</h4>
+      <h4 style="margin-top: -36px; margin-left: 272px; font-family: Helvetica Neue, Roboto, Arial, sans-serif;">Voice</h4>
+      <div class="dropdown">
+        <button id="dropdownbtn" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" style="width: 22%">Select language and region</button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="#" onclick="selectVoice(1);">US English</a>
+                <a class="dropdown-item" href="#" onclick="selectVoice(2);">Indian English</a>
+                <a class="dropdown-item" href="#" onclick="selectVoice(3);">British English</a>
+                <a class="dropdown-item" href="#" onclick="selectVoice(4);">Australian English</a>
+            </div>
+      </div>
+      <div id="checkbox" style="margin-top: -38px; margin-left: 270px; width: 30%;">
+      <span>Select Language and region...</span>     
+      </div>       
+    </div>
+    <div id="audio" class="container tab-pane fade"><br>
+      <h3>Menu 1</h3>
+      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    </div>    
+  </div>
+</div>
+</body>
+</html>
