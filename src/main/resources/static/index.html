@@ -58,11 +58,14 @@ $(document).ready(function() {
              data:JSON.stringify(obj),
              contentType:"application/json",
              success: function(data){
-                alert(data);
+               var html='<div class="alert alert-success alert-dismissible" style="margin-top: -511px; width: 427px; float:right; position: absolute; z-index: 999; margin-left: 67%;">';
+               html += '<button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
+               html += '<strong>Success!</strong> Audio created and moved to s3 bucket';
+               html += '</div>';
+               $(html).appendTo('body');
              }
             });                  
-    });
-    
+    });   
 });
 
 function selectVoice(e){    
@@ -110,7 +113,7 @@ function selectVoice(e){
 </head>
 <body>
 <div class="container">
-  <h2 style="border-bottom: 2px solid #1d2124;">Text-To-Speech</h2>
+  <h2 style="border-bottom: 2px solid #1d2124;">Text-To-Speech</h2>  
   <br>
   <h4 style="margin-top: -14px">Listen, customize, and download speech. Integrate when you're ready.</h4><br/>
   <p>Type or paste your text in the window, choose your language and region, choose a voice, choose Listen to speech, and then integrate it into your applications and services.</p>
