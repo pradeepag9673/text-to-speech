@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Configuration property group for Amazon S3 and AWS
  *
- * @author kbastani
+ * @author pradeep_ga
  */
 @Configuration
 @ConfigurationProperties(prefix = "amazon")

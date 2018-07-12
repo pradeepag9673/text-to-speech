@@ -1,7 +1,5 @@
 package com.polly.model;
 
-import com.polly.utils.CommonUtils;
-
 /**
  * @author pradeep_ga
  * AudioMetadata contains metadata
@@ -10,8 +8,7 @@ public class AudioMetadata {
 
     private String voice;
     private String plaintext;
-    private String format = CommonUtils.AUDIOFORMAT_MP3; 
-    
+        
     /**
      * @return - voice
      */
@@ -36,18 +33,5 @@ public class AudioMetadata {
     public void setPlaintext(String plaintext) {
         this.plaintext = plaintext;
     }
-    /**
-     * @return - format
-     */
-    public String getFormat() {
-        return format;
-    }
-    /**
-     * @param format - format of an audio file
-     */
-    public void setFormat(String format) {
-        this.format = format;
-    }    
-    
-    
+       
 }
