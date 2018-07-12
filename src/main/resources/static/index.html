@@ -58,11 +58,11 @@ $(document).ready(function() {
              data:JSON.stringify(obj),
              contentType:"application/json",
              success: function(data){
-               var html='<div class="alert alert-success alert-dismissible" style="margin-top: -511px; width: 427px; float:right; position: absolute; z-index: 999; margin-left: 67%;">';
+               var html='<div class="alert alert-success alert-dismissible" style="width: 427px; float: right; position: absolute; z-index: 999; margin-left: 59%; margin-top: 49px;">';
                html += '<button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
                html += '<strong>Success!</strong> Audio created and moved to s3 bucket';
                html += '</div>';
-               $(html).appendTo('body');
+               $("#container").prepend(html);
              }
             });                  
     });   
@@ -112,7 +112,7 @@ function selectVoice(e){
 </script>
 </head>
 <body>
-<div class="container">
+<div class="container" id="container">
   <h2 style="border-bottom: 2px solid #1d2124;">Text-To-Speech</h2>  
   <br>
   <h4 style="margin-top: -14px">Listen, customize, and download speech. Integrate when you're ready.</h4><br/>
