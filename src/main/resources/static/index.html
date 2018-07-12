@@ -52,7 +52,15 @@ $(document).ready(function() {
     
     $("#converttxttospeech").click(function(){
          var obj = {"plaintext": $("#textarea").val(), "voice": $("input[name='group100']:checked").val()};
-         console.log(obj);         
+         $.ajax({
+             url:"voices",
+             type:"POST",
+             data:JSON.stringify(obj),
+             contentType:"application/json",
+             success: function(data){
+                alert(data);
+             }
+            });                  
     });
     
 });
