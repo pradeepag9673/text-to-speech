@@ -109,6 +109,43 @@ function selectVoice(e){
     }
     $("#checkbox").html(html);
 }
+
+function getAudioData(){
+	var html='';
+	$.ajax({
+        url:"voices/audio",
+        type:"GET",
+        contentType:"application/json",
+        success: function(data){
+        console.log(data);
+        for(var i = 0;i < data.length;i++){
+            html += '<tr>';
+            html += '<td>'+data[i].key+'</td>';
+            html += '<td><audio src="'+data[i].url+'" controls="controls"></audio></td>';
+            html += '<td>'+data[i].lastModified+'</td>';            
+            html += '<td><button type="button" class="btn btn-danger" onclick="deleteAudioFromS3(\''+data[i].key+'\');"><strong>X</strong></button></td>'
+            html += '</tr>';
+        }
+        $("#audiobody").html(html);
+        }
+       });   
+}
+
+function deleteAudioFromS3(id){
+	$.ajax({
+        url:"voices/audio/"+id,
+        type:"DELETE",
+        contentType:"application/json",
+        success: function(data){
+        	var html='<div class="alert alert-success alert-dismissible" style="width: 427px; float: right; position: absolute; z-index: 999; margin-left: 59%; margin-top: 49px;">';
+            html += '<button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
+            html += '<strong>Success!</strong> Audio deleted from s3 bucket';
+            html += '</div>';
+            $("#container").prepend(html);
+            getAudioData();
+        }
+       });   	
+}
 </script>
 </head>
 <body>
@@ -123,7 +160,7 @@ function selectVoice(e){
       <a class="nav-link active" data-toggle="tab" href="#plaintxt">Plain Text</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" data-toggle="tab" href="#audio">Audio</a>
+      <a class="nav-link" data-toggle="tab" href="#audio" onclick="getAudioData();">Audio</a>
     </li>    
   </ul>
 
@@ -155,8 +192,21 @@ function selectVoice(e){
       </div>       
     </div>
     <div id="audio" class="container tab-pane fade"><br>
-      <h3>Menu 1</h3>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+      <h3>List Of Audio Files</h3>
+      <div id="audio-container">
+      <table class="table table-bordered">
+        <thead>
+            <tr>
+            <th>File Name</th>
+            <th>Link</th>
+            <th>Created Date</th> 
+            <th>Delete</th>           
+            </tr>
+        </thead>   
+        <tbody id="audiobody">        
+        </tbody>
+      </table>
+      </div>
     </div>    
   </div>
 </div>
