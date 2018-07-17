@@ -12,6 +12,23 @@ public class S3AudioMetadata {
     private String key;
     private URL url;
     private Date lastModified;
+    
+    /**
+     * default constructor
+     */
+    public S3AudioMetadata() {}
+    
+    /**
+     * @param key - File Name
+     * @param url - s3 file url
+     * @param lastModified - file last modified
+     */
+    public S3AudioMetadata(String key, URL url, Date lastModified) {
+        this.key = key;
+        this.url = url;
+        this.lastModified = lastModified;        
+    }
+    
     /**
      * @return - s3 object name
      */

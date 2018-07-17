@@ -21,6 +21,8 @@ var ind_voice = [{"id":"Raveena, Female","name":"Raveena"}, {"id":"Aditi, Female
 var uk_voice = [{"id":"Emma, Female","name":"Emma"}, {"id":"Brian, Male","name":"Brian"}, {"id":"Amy, Female","name":"Amy"}];
 var aus_voice = [{"id":"Russell, Male","name":"Russell"}, {"id":"Nicole, Female","name":"Nicole"}];
 
+var popup_html_start = '<div class="alert alert-success alert-dismissible" style="width: 427px; float: right; position: absolute; z-index: 999; margin-left: 59%; margin-top: 49px;"><button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
+var popup_html_end = '</div>';
 $(document).ready(function() {
     var text_max = 3000;
     var default_text = "Hi! My name is Joanna. I will read any text you type here.";
@@ -58,11 +60,7 @@ $(document).ready(function() {
              data:JSON.stringify(obj),
              contentType:"application/json",
              success: function(data){
-               var html='<div class="alert alert-success alert-dismissible" style="width: 427px; float: right; position: absolute; z-index: 999; margin-left: 59%; margin-top: 49px;">';
-               html += '<button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
-               html += '<strong>Success!</strong> Audio created and moved to s3 bucket';
-               html += '</div>';
-               $("#container").prepend(html);
+            	 $("#container").prepend(popup_html_start+'<strong>Success!</strong> '+data+ popup_html_end);
              }
             });                  
     });   
@@ -137,11 +135,7 @@ function deleteAudioFromS3(id){
         type:"DELETE",
         contentType:"application/json",
         success: function(data){
-        	var html='<div class="alert alert-success alert-dismissible" style="width: 427px; float: right; position: absolute; z-index: 999; margin-left: 59%; margin-top: 49px;">';
-            html += '<button id="closemessage" type="button" class="close" data-dismiss="alert">&times;</button>';
-            html += '<strong>Success!</strong> Audio deleted from s3 bucket';
-            html += '</div>';
-            $("#container").prepend(html);
+        	$("#container").prepend(popup_html_start+'<strong>Success!</strong> '+data+ popup_html_end);
             getAudioData();
         }
        });   	

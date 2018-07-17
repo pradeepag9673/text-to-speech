@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,7 +63,7 @@ public class MainController {
         OutputStream speechOutputStream = new FileOutputStream(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3); 
         IOUtils.copy(speechInputStream, speechOutputStream);
         amazonS3Template.s3Client().putObject(new PutObjectRequest(amazonProperties.getS3().getDefaultBucket(), timestamp.getTime()+"."+OutputFormat.Mp3, new File(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3)).withCannedAcl(CannedAccessControlList.PublicRead));
-        return "Audio created successfully";
+        return "Audio created and moved to s3 bucket";
     }
     
     /**
@@ -71,16 +71,9 @@ public class MainController {
      */
     @RequestMapping(value="audio", method=RequestMethod.GET)
     public List<S3AudioMetadata> getAudio() {
-        List<S3AudioMetadata> listOfS3AudioMetadata = new ArrayList<>();
         ListObjectsV2Result result = amazonS3Template.s3Client().listObjectsV2(amazonProperties.getS3().getDefaultBucket());
         List<S3ObjectSummary> objects = result.getObjectSummaries();
-        for (S3ObjectSummary os: objects) {
-            S3AudioMetadata s3AudioMetadata = new S3AudioMetadata();
-            s3AudioMetadata.setKey(os.getKey());
-            s3AudioMetadata.setUrl(amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), os.getKey()));
-            s3AudioMetadata.setLastModified(os.getLastModified());
-            listOfS3AudioMetadata.add(s3AudioMetadata);
-        }        
+        List<S3AudioMetadata> listOfS3AudioMetadata = objects.stream().map(e->new S3AudioMetadata(e.getKey(), amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), e.getKey()), e.getLastModified())).collect(Collectors.toList());      
         return listOfS3AudioMetadata;
     }
     
@@ -91,7 +84,7 @@ public class MainController {
     @RequestMapping(value="audio/{id}", method=RequestMethod.DELETE)
     public String deleteAudio(@PathVariable String id) {
         amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), id);
-        return "Audio deleted successfully";                
+        return "Audio deleted from s3 bucket";                
     }
    
     private InputStream synthesize(String plaintext, String voice, OutputFormat format) {
