@@ -16,6 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonaws.services.elastictranscoder.model.CreateJobOutput;
+import com.amazonaws.services.elastictranscoder.model.CreateJobRequest;
+import com.amazonaws.services.elastictranscoder.model.CreateJobResult;
+import com.amazonaws.services.elastictranscoder.model.JobInput;
+import com.amazonaws.services.elastictranscoder.model.JobOutput;
+import com.amazonaws.services.elastictranscoder.model.ListPipelinesRequest;
+import com.amazonaws.services.elastictranscoder.model.ListPipelinesResult;
+import com.amazonaws.services.elastictranscoder.model.Preset;
 import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
@@ -24,6 +32,7 @@ import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
+import com.polly.configuration.AmazonElasticTranscoderTemplate;
 import com.polly.configuration.AmazonPollyTemplate;
 import com.polly.configuration.AmazonProperties;
 import com.polly.configuration.AmazonS3Template;
@@ -51,6 +60,9 @@ public class MainController {
     @Autowired
     AmazonPollyTemplate amazonPollyTemplate;
     
+    @Autowired
+    AmazonElasticTranscoderTemplate amazonElasticTranscoderTemplate;
+    
     /**
      * @param audioMetadata - contains audio metadata
      * @return - success message "Audio created successfully"
@@ -63,7 +75,24 @@ public class MainController {
         OutputStream speechOutputStream = new FileOutputStream(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3); 
         IOUtils.copy(speechInputStream, speechOutputStream);
         amazonS3Template.s3Client().putObject(new PutObjectRequest(amazonProperties.getS3().getDefaultBucket(), timestamp.getTime()+"."+OutputFormat.Mp3, new File(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3)).withCannedAcl(CannedAccessControlList.PublicRead));
-        return "Audio created and moved to s3 bucket";
+        ListPipelinesResult p = amazonElasticTranscoderTemplate.transcoderClient().listPipelines();
+        CreateJobRequest jobRequest = new CreateJobRequest();
+        jobRequest.setPipelineId("1531822153014-fvclsh");
+        jobRequest.setOutputKeyPrefix(amazonProperties.getS3().getWavFolder().concat("/"));
+        JobInput input = new JobInput();
+        input.setKey(timestamp.getTime()+"."+OutputFormat.Mp3);
+        input.setAspectRatio("auto");
+        input.setFrameRate("auto");
+        input.setResolution("auto");
+        input.setContainer("mp3");
+        jobRequest.setInput(input);
+        CreateJobOutput output = new CreateJobOutput();
+        output.setKey(timestamp.getTime()+".wav");        
+        output.setPresetId("1351620000001-300300");
+        jobRequest.setOutput(output);
+        CreateJobResult result = amazonElasticTranscoderTemplate.transcoderClient().createJob(jobRequest);
+        System.out.println("****** " + result);
+        return "Audio files created and moved to s3 bucket";
     }
     
     /**
