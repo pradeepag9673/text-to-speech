@@ -114,6 +114,8 @@ public class AmazonProperties {
     public static class S3 {
 
         private String defaultBucket;
+    
+        private String wavFolder;
 
         /**
          * The Amazon S3 bucket name for this application.
@@ -131,12 +133,31 @@ public class AmazonProperties {
          */
         public void setDefaultBucket(String defaultBucket) {
             this.defaultBucket = defaultBucket;
+        }        
+
+        /**
+         * The Amazon S3 bucket's folder name for this application.
+         * 
+         * @return - The Amazon S3 buckets wav folder name
+         */
+        public String getWavFolder() {
+            return wavFolder;
+        }
+
+        /**
+         * The Amazon S3 bucket's folder name for this application.
+         * 
+         * @param wavFolder - The Amazon S3 buckets wav foldername
+         */
+        public void setWavFolder(String wavFolder) {
+            this.wavFolder = wavFolder;
         }
 
         @Override
         public String toString() {
             return "S3{" +
                     "defaultBucket='" + defaultBucket + '\'' +
+                    "wavFolder='" + wavFolder + '\'' +
                     '}';
         }
     }
