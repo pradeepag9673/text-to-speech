@@ -18,6 +18,9 @@ public class AmazonProperties {
 
     @NestedConfigurationProperty
     private S3 s3;
+    
+    @NestedConfigurationProperty
+    private Transcoder transcoder;
 
     /**
      * A property group for Amazon Web Service (AWS) configurations
@@ -54,6 +57,26 @@ public class AmazonProperties {
     public void setS3(S3 s3) {
         this.s3 = s3;
     }
+    
+    /**
+     * A property group for Amazon Transcoder configurations
+     * 
+     * @return a property group for Amazon Transcoder configurations
+     */
+    public Transcoder getTranscoder() {
+        return transcoder;
+    }
+
+    /**
+     * A property group for Amazon Transcoder configuration
+     * 
+     * @param transcoder is a property group for Amazon Transcoder configurations
+     */
+    public void setTranscoder(Transcoder transcoder) {
+        this.transcoder = transcoder;
+    }
+
+
 
     /**
      * A property group for Amazon Web Service (AWS) configurations
@@ -116,6 +139,8 @@ public class AmazonProperties {
         private String defaultBucket;
     
         private String wavFolder;
+        
+        private String m4aFolder;
 
         /**
          * The Amazon S3 bucket name for this application.
@@ -151,6 +176,24 @@ public class AmazonProperties {
          */
         public void setWavFolder(String wavFolder) {
             this.wavFolder = wavFolder;
+        }       
+        
+        /**
+         * The Amazon S3 bucket's folder name for this application.
+         * 
+         * @return - The Amazon S3 buckets m4a folder name
+         */
+        public String getM4aFolder() {
+            return m4aFolder;
+        }
+
+        /**
+         * The Amazon S3 bucket's folder name for this application.
+         * 
+         * @param m4aFolder - The Amazon S3 buckets m4a foldername
+         */
+        public void setM4aFolder(String m4aFolder) {
+            this.m4aFolder = m4aFolder;
         }
 
         @Override
@@ -158,15 +201,52 @@ public class AmazonProperties {
             return "S3{" +
                     "defaultBucket='" + defaultBucket + '\'' +
                     "wavFolder='" + wavFolder + '\'' +
+                    "m4aFolder='" + m4aFolder + '\'' +
                     '}';
         }
     }
+    
+    /**
+     * A property group for Amazon Web Service (AWS) configurations
+     *
+     */
+    public static class Transcoder {
+        
+        private String pipelineName;
+
+        /**
+         * The Amazon Transcoder pipeline name for this application.
+         * 
+         * @return - piprline name
+         */
+        public String getPipelineName() {
+            return pipelineName;
+        }
+
+        /**
+         * The Amazon Transcoder pipeline name for this application.
+         * 
+         * @param pipelineName - sets pipeline name
+         */
+        public void setPipelineName(String pipelineName) {
+            this.pipelineName = pipelineName;
+        }
+        
+        @Override
+        public String toString() {
+            return "Transcoder{" +
+                    "pipelinename='" + pipelineName + '\'' +
+                    '}';
+        }
+    }
+    
 
     @Override
     public String toString() {
         return "AmazonProperties{" +
                 "aws=" + aws +
                 ", amazon.s3=" + s3 +
+                ", amazon.transcoder=" + transcoder +
                 '}';
     }
 }

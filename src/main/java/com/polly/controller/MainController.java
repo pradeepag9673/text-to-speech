@@ -18,12 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonaws.services.elastictranscoder.model.CreateJobOutput;
 import com.amazonaws.services.elastictranscoder.model.CreateJobRequest;
-import com.amazonaws.services.elastictranscoder.model.CreateJobResult;
 import com.amazonaws.services.elastictranscoder.model.JobInput;
-import com.amazonaws.services.elastictranscoder.model.JobOutput;
-import com.amazonaws.services.elastictranscoder.model.ListPipelinesRequest;
 import com.amazonaws.services.elastictranscoder.model.ListPipelinesResult;
-import com.amazonaws.services.elastictranscoder.model.Preset;
 import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
@@ -32,13 +28,17 @@ import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.polly.configuration.AmazonElasticTranscoderTemplate;
 import com.polly.configuration.AmazonPollyTemplate;
 import com.polly.configuration.AmazonProperties;
 import com.polly.configuration.AmazonS3Template;
 import com.polly.configuration.CommonProperties;
 import com.polly.model.AudioMetadata;
+import com.polly.model.Pipeline;
 import com.polly.model.S3AudioMetadata;
+import com.polly.model.TranscoderPipeline;
 
 /**
  * @author pradeep_ga
@@ -75,10 +75,19 @@ public class MainController {
         OutputStream speechOutputStream = new FileOutputStream(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3); 
         IOUtils.copy(speechInputStream, speechOutputStream);
         amazonS3Template.s3Client().putObject(new PutObjectRequest(amazonProperties.getS3().getDefaultBucket(), timestamp.getTime()+"."+OutputFormat.Mp3, new File(commonProperties.getPath()+timestamp.getTime()+"."+OutputFormat.Mp3)).withCannedAcl(CannedAccessControlList.PublicRead));
-        ListPipelinesResult p = amazonElasticTranscoderTemplate.transcoderClient().listPipelines();
+        Gson gson = new Gson();
+        ListPipelinesResult listPipelinesResult = amazonElasticTranscoderTemplate.transcoderClient().listPipelines();
+        TranscoderPipeline pipeline = gson.fromJson(gson.toJson(listPipelinesResult), new TypeToken<TranscoderPipeline>(){}.getType());
+        createJobForFileTranscoder(getTranscoderPipelineId(pipeline), timestamp, ".wav", amazonProperties.getS3().getWavFolder().concat("/"), "1351620000001-300300");
+        createJobForFileTranscoder(getTranscoderPipelineId(pipeline), timestamp, ".m4a", amazonProperties.getS3().getM4aFolder().concat("/"), "1351620000001-100110");
+        return "Audio files created and moved to s3 bucket";
+    }
+    
+    private void createJobForFileTranscoder(String id, Timestamp timestamp, String mediaType, String outputPrefix, String presetId) {
+        // TODO Auto-generated method stub
         CreateJobRequest jobRequest = new CreateJobRequest();
-        jobRequest.setPipelineId("1531822153014-fvclsh");
-        jobRequest.setOutputKeyPrefix(amazonProperties.getS3().getWavFolder().concat("/"));
+        jobRequest.setPipelineId(id);
+        jobRequest.setOutputKeyPrefix(outputPrefix);
         JobInput input = new JobInput();
         input.setKey(timestamp.getTime()+"."+OutputFormat.Mp3);
         input.setAspectRatio("auto");
@@ -87,14 +96,17 @@ public class MainController {
         input.setContainer("mp3");
         jobRequest.setInput(input);
         CreateJobOutput output = new CreateJobOutput();
-        output.setKey(timestamp.getTime()+".wav");        
-        output.setPresetId("1351620000001-300300");
-        jobRequest.setOutput(output);
-        CreateJobResult result = amazonElasticTranscoderTemplate.transcoderClient().createJob(jobRequest);
-        System.out.println("****** " + result);
-        return "Audio files created and moved to s3 bucket";
+        output.setKey(timestamp.getTime()+mediaType);        
+        output.setPresetId(presetId);
+        jobRequest.setOutput(output);        
+        amazonElasticTranscoderTemplate.transcoderClient().createJob(jobRequest);
     }
-    
+
+    private String getTranscoderPipelineId(TranscoderPipeline pipelines) {
+        Pipeline  p = pipelines.getPipelines().stream().filter(pipeline -> amazonProperties.getTranscoder().getPipelineName().equals(pipeline.getName())).findAny().orElse(null);
+        return p.getId();
+    }
+
     /**
      * @return - List of Audio Files and Metadata
      */
