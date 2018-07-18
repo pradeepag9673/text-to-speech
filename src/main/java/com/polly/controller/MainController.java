@@ -22,11 +22,9 @@ import com.amazonaws.services.elastictranscoder.model.JobInput;
 import com.amazonaws.services.elastictranscoder.model.ListPipelinesResult;
 import com.amazonaws.services.polly.model.OutputFormat;
 import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
-import com.amazonaws.services.polly.model.SynthesizeSpeechResult;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -50,7 +48,7 @@ public class MainController {
 
     @Autowired
     AmazonProperties amazonProperties;
-    
+
     @Autowired
     CommonProperties commonProperties;
 
@@ -59,10 +57,10 @@ public class MainController {
 
     @Autowired
     AmazonPollyTemplate amazonPollyTemplate;
-    
+
     @Autowired
     AmazonElasticTranscoderTemplate amazonElasticTranscoderTemplate;
-    
+
     /**
      * @param audioMetadata - contains audio metadata
      * @return - success message "Audio created successfully"
@@ -82,7 +80,7 @@ public class MainController {
         createJobForFileTranscoder(getTranscoderPipelineId(pipeline), timestamp, ".m4a", amazonProperties.getS3().getM4aFolder().concat("/"), "1351620000001-100110");
         return "Audio files created and moved to s3 bucket";
     }
-    
+
     private void createJobForFileTranscoder(String id, Timestamp timestamp, String mediaType, String outputPrefix, String presetId) {
         // TODO Auto-generated method stub
         CreateJobRequest jobRequest = new CreateJobRequest();
@@ -113,11 +111,9 @@ public class MainController {
     @RequestMapping(value="audio", method=RequestMethod.GET)
     public List<S3AudioMetadata> getAudio() {
         ListObjectsV2Result result = amazonS3Template.s3Client().listObjectsV2(amazonProperties.getS3().getDefaultBucket());
-        List<S3ObjectSummary> objects = result.getObjectSummaries();
-        List<S3AudioMetadata> listOfS3AudioMetadata = objects.stream().map(e->new S3AudioMetadata(e.getKey(), amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), e.getKey()), e.getLastModified())).collect(Collectors.toList());      
-        return listOfS3AudioMetadata;
+        return result.getObjectSummaries().stream().map(e->new S3AudioMetadata(e.getKey(), amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), e.getKey()), e.getLastModified())).collect(Collectors.toList());     
     }
-    
+
     /**
      * @param id - Audio key
      * @return - Delete audio file
@@ -127,11 +123,9 @@ public class MainController {
         amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), id);
         return "Audio deleted from s3 bucket";                
     }
-   
+
     private InputStream synthesize(String plaintext, String voice, OutputFormat format) {
-        SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(plaintext).withVoiceId(voice).withOutputFormat(format);
-        SynthesizeSpeechResult synthRes = amazonPollyTemplate.pollyClient().synthesizeSpeech(synthReq);
-        return synthRes.getAudioStream();        
-    }   
+        return amazonPollyTemplate.pollyClient().synthesizeSpeech(new SynthesizeSpeechRequest().withText(plaintext).withVoiceId(voice).withOutputFormat(format)).getAudioStream();                
+    } 
 
 }
