@@ -146,8 +146,7 @@ public class MainController {
     }
 
     private String convertDatetimeToDate(Date lastModified) {
-        SimpleDateFormat ft = new SimpleDateFormat ("yyyy/MM/dd");
-        return ft.format(lastModified);
+        return new SimpleDateFormat ("yyyy/MM/dd").format(lastModified);
     }
 
     private String getKey(String key) {
@@ -169,7 +168,9 @@ public class MainController {
      */
     @RequestMapping(value="audio/{id}", method=RequestMethod.DELETE)
     public String deleteAudio(@PathVariable String id) {
-        amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), id);
+        amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), id.concat(".mp3"));
+        amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), amazonProperties.getS3().getM4aFolder().concat("/").concat(id).concat(".m4a"));
+        amazonS3Template.s3Client().deleteObject(amazonProperties.getS3().getDefaultBucket(), amazonProperties.getS3().getWavFolder().concat("/").concat(id).concat(".wav"));
         return "Audio deleted from s3 bucket";                
     }
 
