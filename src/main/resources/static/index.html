@@ -14,6 +14,9 @@
 background-color: #1166bb;
 border-color: #1166bb;
 }
+audio{
+width: 250px;
+}
 </style>
 <script>
 var us_voice = [{"id":"Salli, Female","name":"Salli"}, {"id":"Matthew, Male","name":"Matthew"}, {"id":"Kimberly, Female","name":"Kimberly"}, {"id":"Kendra, Female","name":"Kendra"}, {"id":"Justin, Male","name":"Justin"}, {"id":"Joey, Male","name":"Joey"}, {"id":"Joanna, Female","name":"Joanna"}, {"id":"Ivy, Female","name":"Ivy"}];
@@ -119,7 +122,9 @@ function getAudioData(){
         for(var i = 0;i < data.length;i++){
             html += '<tr>';
             html += '<td>'+data[i].key+'</td>';
-            html += '<td><audio src="'+data[i].url+'" controls="controls"></audio></td>';
+            for(var j = 0;j < data[i].url.length;j++){
+            html += '<td><audio src="'+data[i].url[j]+'" controls="controls"></audio></td>';
+            }
             html += '<td>'+data[i].lastModified+'</td>';            
             html += '<td><button type="button" class="btn btn-danger" onclick="deleteAudioFromS3(\''+data[i].key+'\');"><strong>X</strong></button></td>'
             html += '</tr>';
@@ -192,7 +197,9 @@ function deleteAudioFromS3(id){
         <thead>
             <tr>
             <th>File Name</th>
-            <th>Link</th>
+            <th>MP3 File</th>
+            <th>M4A File</th>
+            <th>WAV File</th>
             <th>Created Date</th> 
             <th>Delete</th>           
             </tr>

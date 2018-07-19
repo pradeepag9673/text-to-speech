@@ -1,7 +1,9 @@
 package com.polly.model;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author pradeep_ga
@@ -10,25 +12,14 @@ import java.util.Date;
 public class S3AudioMetadata {
 
     private String key;
-    private URL url;
-    private Date lastModified;
+    private List<URL> url = new ArrayList<>();
+    private String lastModified;
     
     /**
      * default constructor
      */
     public S3AudioMetadata() {}
-    
-    /**
-     * @param key - File Name
-     * @param url - s3 file url
-     * @param lastModified - file last modified
-     */
-    public S3AudioMetadata(String key, URL url, Date lastModified) {
-        this.key = key;
-        this.url = url;
-        this.lastModified = lastModified;        
-    }
-    
+      
     /**
      * @return - s3 object name
      */
@@ -44,25 +35,25 @@ public class S3AudioMetadata {
     /**
      * @return - s3 object url
      */
-    public URL getUrl() {
+    public List<URL> getUrl() {
         return url;
     }
     /**
      * @param url - set s3 object url
      */
-    public void setUrl(URL url) {
+    public void setUrl(List<URL> url) {
         this.url = url;
     }
     /**
      * @return - last modified date
      */
-    public Date getLastModified() {
+    public String getLastModified() {
         return lastModified;
     }
     /**
      * @param lastModified - set last modified date
      */
-    public void setLastModified(Date lastModified) {
+    public void setLastModified(String lastModified) {
         this.lastModified = lastModified;
     }  
     

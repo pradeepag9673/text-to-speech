@@ -5,9 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +30,7 @@ import com.amazonaws.services.polly.model.SynthesizeSpeechRequest;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.util.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -60,6 +66,8 @@ public class MainController {
 
     @Autowired
     AmazonElasticTranscoderTemplate amazonElasticTranscoderTemplate;
+    
+    private static final String invalid = "INVALID";
 
     /**
      * @param audioMetadata - contains audio metadata
@@ -111,7 +119,48 @@ public class MainController {
     @RequestMapping(value="audio", method=RequestMethod.GET)
     public List<S3AudioMetadata> getAudio() {
         ListObjectsV2Result result = amazonS3Template.s3Client().listObjectsV2(amazonProperties.getS3().getDefaultBucket());
-        return result.getObjectSummaries().stream().map(e->new S3AudioMetadata(e.getKey(), amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), e.getKey()), e.getLastModified())).collect(Collectors.toList());     
+        return populateS3AudioMetadata(result);
+    }
+
+    private List<S3AudioMetadata> populateS3AudioMetadata(ListObjectsV2Result result) {
+        S3AudioMetadata s3AudioMetadata = null;
+        Map<String, S3AudioMetadata> map = new HashMap<>();
+        for(int i = 0;i<result.getObjectSummaries().size();i++) {
+            String key = getKey(result.getObjectSummaries().get(i).getKey()); 
+            if(!key.equals(invalid)){
+                s3AudioMetadata = map.get(key) != null ? map.get(key) : populateS3Metadata(result.getObjectSummaries().get(i));
+                List<URL> url = s3AudioMetadata.getUrl();
+                url.add(amazonS3Template.s3Client().getUrl(amazonProperties.getS3().getDefaultBucket(), result.getObjectSummaries().get(i).getKey()));
+                s3AudioMetadata.setUrl(url);
+                map.put(key, s3AudioMetadata);
+            }            
+        }
+        return new ArrayList<>(map.values()); 
+    }
+
+    private S3AudioMetadata populateS3Metadata(S3ObjectSummary s3ObjectSummary) {
+        S3AudioMetadata s3AudioMetadata = new S3AudioMetadata();
+        s3AudioMetadata.setKey(getKey(s3ObjectSummary.getKey()));        
+        s3AudioMetadata.setLastModified(convertDatetimeToDate(s3ObjectSummary.getLastModified()));        
+        return s3AudioMetadata;
+    }
+
+    private String convertDatetimeToDate(Date lastModified) {
+        SimpleDateFormat ft = new SimpleDateFormat ("yyyy/MM/dd");
+        return ft.format(lastModified);
+    }
+
+    private String getKey(String key) {
+        String fileName = "";
+        if(key.contains(".mp3") || key.contains(".wav")|| key.contains(".m4a")) {
+            if(key.contains(".mp3")) {
+                fileName = key.substring(0, key.indexOf(".")); 
+            }else {
+                fileName = key.substring(key.indexOf("/")+1, key.indexOf("."));
+            }           
+            return fileName;
+        } 
+        return invalid;
     }
 
     /**
