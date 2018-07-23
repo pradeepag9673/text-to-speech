@@ -31,6 +31,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.util.IOUtils;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +39,7 @@ import com.polly.configuration.AmazonElasticTranscoderTemplate;
 import com.polly.configuration.AmazonPollyTemplate;
 import com.polly.configuration.AmazonProperties;
 import com.polly.configuration.AmazonS3Template;
+import com.polly.configuration.AmazonSimpleNotificationServiceTemplate;
 import com.polly.configuration.CommonProperties;
 import com.polly.model.AudioMetadata;
 import com.polly.model.Pipeline;
@@ -63,6 +65,9 @@ public class MainController {
 
     @Autowired
     AmazonPollyTemplate amazonPollyTemplate;
+    
+    @Autowired
+    AmazonSimpleNotificationServiceTemplate amazonSnsTemplate;
 
     @Autowired
     AmazonElasticTranscoderTemplate amazonElasticTranscoderTemplate;
@@ -86,6 +91,9 @@ public class MainController {
         TranscoderPipeline pipeline = gson.fromJson(gson.toJson(listPipelinesResult), new TypeToken<TranscoderPipeline>(){}.getType());
         createJobForFileTranscoder(getTranscoderPipelineId(pipeline), timestamp, ".wav", amazonProperties.getS3().getWavFolder().concat("/"), "1351620000001-300300");
         createJobForFileTranscoder(getTranscoderPipelineId(pipeline), timestamp, ".m4a", amazonProperties.getS3().getM4aFolder().concat("/"), "1351620000001-100110");
+        String msg = "Media file named '"+timestamp.getTime()+"' have been transcoded successfully in to different formats('M4A','MP3','WAV').";
+        PublishRequest publishRequest = new PublishRequest(amazonProperties.getSns().getTopic(), msg);
+        amazonSnsTemplate.snsClient().publish(publishRequest);
         return "Audio files created and moved to s3 bucket";
     }
 

@@ -21,6 +21,9 @@ public class AmazonProperties {
     
     @NestedConfigurationProperty
     private Transcoder transcoder;
+    
+    @NestedConfigurationProperty
+    private SNS sns;
 
     /**
      * A property group for Amazon Web Service (AWS) configurations
@@ -75,6 +78,26 @@ public class AmazonProperties {
     public void setTranscoder(Transcoder transcoder) {
         this.transcoder = transcoder;
     }
+
+    /**
+     * A property group for Amazon Simple Notification Service configuration
+     * 
+     * @return a property group for Amazon Simple Notification Service
+     */
+    public SNS getSns() {
+        return sns;
+    }
+
+    /**
+     * A property group for Amazon Simple Notification Service configuration
+     * 
+     * @param sns is a property group for Amazon Simple Notification Service
+     */
+    public void setSns(SNS sns) {
+        this.sns = sns;
+    }
+
+
 
 
 
@@ -217,7 +240,7 @@ public class AmazonProperties {
         /**
          * The Amazon Transcoder pipeline name for this application.
          * 
-         * @return - piprline name
+         * @return - pipeline name
          */
         public String getPipelineName() {
             return pipelineName;
@@ -240,6 +263,41 @@ public class AmazonProperties {
         }
     }
     
+    /**
+     * A property group for Amazon Web Service (AWS) configurations
+     * 
+     */
+    public static class SNS{
+        
+        private String topic;
+
+        /**
+         * The Amazon Simple Notification Service Topic name for this application.
+         *  
+         * @return - topic name
+         */
+        public String getTopic() {
+            return topic;
+        }
+
+        /**
+         * The Amazon Simple Notification Service Topic name for this application.
+         * 
+         * @param topic - sets topic name
+         */
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
+        
+        @Override
+        public String toString() {
+            return "SNS{" +
+                    "topicname='" + topic + '\'' +
+                    '}';
+        }
+        
+    }
+    
 
     @Override
     public String toString() {
@@ -247,6 +305,7 @@ public class AmazonProperties {
                 "aws=" + aws +
                 ", amazon.s3=" + s3 +
                 ", amazon.transcoder=" + transcoder +
+                ", amazon.sns=" + sns +
                 '}';
     }
 }
